@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>layout 后台大布局 - Layui</title>
+    <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        .jumcolor {
+            background-color: chocolate;
+            color: black;
+        }
+    </style>
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body class="layui-layout-body">
+    <div class="layui-layout layui-layout-admin">
+            <div class="layui-header">
+                    <div class="layui-logo">员工工资管理系统</div>
+                    <!-- 头部区域（可配合layui已有的水平导航） -->
+                    <ul class="layui-nav layui-layout-left">
+                        <li class="layui-nav-item"><a href="/finddutys">员工信息查询</a></li>
+                        <li class="layui-nav-item"><a href="/salaryInfo">员工薪资查询</a></li>
+                        <li class="layui-nav-item"><a href="/addcheckstat">添加员工考勤</a></li>
+                    </ul>
+                    <ul class="layui-nav layui-layout-right">
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">
+                                <img src="http://t.cn/RCzsdCq" class="layui-nav-img" th:text="${session.Username}">
+    
+                            </a>
+                        </li>
+                        <li class="layui-nav-item"><a href="/back">注销</a></li>
+                    </ul>
+                </div>
+
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+                <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                    <li class="layui-nav-item layui-nav-itemed">
+                        <a class="" href="javascript:;">员工管理</a>
+                        <dl class="layui-nav-child">
+                            <dd><a href="/adduser">添加员工</a></dd>
+                            <dd><a href="/delUser">删除员工</a></dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">岗位管理</a>
+                        <dl class="layui-nav-child">
+                            <dd><a href="/addemployeeinfo">添加岗位</a></dd>
+                            <dd><a href="/changeduty">修改岗位</a></dd>
+                        </dl>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="layui-body">
+            <!-- 内容主体区域 -->
+            <div id="app">
+                <!-- 添加新岗位工资标准表单 -->
+                <div class="card py-4 my-4">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <!-- 提交表单 -->
+                            <form>
+
+                                <!-- 表单页面 -->
+                                <div class="row">
+
+                                    <!-- Department -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="">部门</label>
+                                            <select class="form-control" name="DepartmentName" id=""
+                                                @change="getDutyList()" v-model="departmentname">
+                                                <option @click="getDutyList()" v-for="department in departments"
+                                                    :value="department">{{department}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1 offset-md-1">
+                                        <!-- Duty Duty与部门一一对应-->
+                                        <div class="form-group">
+                                            <label for="">岗位</label>
+                                            <select class="form-control" name="Duty" id="" v-model="duty"
+                                                @change="getinfo()">
+                                                <option v-for="d in dutyList">{{d.duty}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- 基本工资 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="">基本工资</label>
+                                            <input type="text" class="form-control" name="BaseWage"
+                                                placeholder="请输入基本工资" v-model="BaseWage">
+                                        </div>
+                                    </div>
+
+                                    <!-- 每日加班薪资 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1 offset-md-1">
+                                        <div class="form-group">
+                                            <label for="">加班待遇</label>
+                                            <input type="text" class="form-control" name="OvertimeJob"
+                                                placeholder="请输入每日加班薪资" v-model="OvertimeJob">
+                                        </div>
+                                    </div>
+
+                                    <!-- 出差薪资 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="">出差待遇</label>
+                                            <input type="text" class="form-control" name="EvectionStandard"
+                                                placeholder="请输入每日出差薪资" v-model="EvectionStandard">
+                                        </div>
+                                    </div>
+
+                                    <!-- 缺勤罚款 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1 offset-md-1">
+                                        <div class="form-group">
+                                            <label for="">缺勤处理</label>
+                                            <input type="text" class="form-control" name="AbsentStandard"
+                                                placeholder="请输入缺勤一天扣除的薪资标准" v-model="AbsentStandard">
+                                        </div>
+                                    </div>
+
+                                    <!-- 迟到罚款 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="">迟到处理</label>
+                                            <input type="text" class="form-control" name="LateStandard"
+                                                placeholder="请输入迟到一天扣除工资标准" v-model="LateStandard">
+                                        </div>
+                                    </div>
+
+                                    <!-- 其他奖励 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1 offset-md-1">
+                                        <div class="form-group">
+                                            <label for="">其他奖励</label>
+                                            <input type="text" class="form-control" name="EtcStandard"
+                                                placeholder="其输入新添加的奖励政策" v-model="EtcStandard">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- 提交重置按钮 -->
+                                <div class="row">
+                                    <!-- 提交按钮 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12">
+                                        <button type="button" @click="changeDuty()"
+                                            class="btn btn-success btn-lg btn-block">修改</button>
+                                    </div>
+
+                                    <!-- 重置按钮 -->
+                                    <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1 offset-md-1">
+                                        <button type="reset" class="btn btn-danger btn-lg btn-block">重置</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="layui-footer">
+            <!-- 底部固定区域 -->
+            © layui.com - 底部固定区域
+        </div>
+    </div>
+    <script src="./layui/layui.js"></script>
+    <script>
+        //JavaScript代码区域
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+
+        new Vue({
+            el: '#app',
+            data: {
+                departments: [],
+                Duty: '',
+                BaseWage: '',
+                OvertimeJob: '',
+                EvectionStandard: '',
+                AbsentStandard: '',
+                LateStandard: '',
+                EtcStandard: '',
+                Bonus: '',
+                DepartmentName: '',
+                departments: [],
+                dutyList: [],
+                defaultDuty: '研发部',
+                departmentname: '研发部',
+                duty: ''
+            },
+            methods: {
+                getDutyList: function () {
+                    console.log(this.departmentname);
+                    this.defaultDuty = this.departmentname;
+                    axios.get('/dutyList', {
+                        params: {
+                            departmentName: this.defaultDuty
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data.duty)
+                            this.dutyList = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                },
+
+                getinfo: function () {
+                    axios.get(`/getdutyinfo/${this.duty}`)
+                        .then(res => {
+                            console.log(res.data);
+                            this.Duty = res.data.duty;
+                            this.BaseWage = res.data.baseWage;
+                            this.OvertimeJob = res.data.overtimeJob;
+                            this.EvectionStandard = res.data.evectionStandard;
+                            this.AbsentStandard = res.data.absentStandard;
+                            this.LateStandard = res.data.lateStandard;
+                            this.EtcStandard = res.data.etcStandard;
+                            this.Bonus = res.data.bonus;
+                            this.DepartmentName = res.data.departmentName
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                },
+                changeDuty: function () {
+                    axios.post('/duty', {
+                        duty: this.Duty,
+                        baseWage: this.BaseWage,
+                        overtimeJob: this.OvertimeJob,
+                        evectionStandard: this.EvectionStandard,
+                        absentStandard: this.AbsentStandard,
+                        lateStandard: this.LateStandard,
+                        etcStandard: this.EtcStandard,
+                        bonus: this.Bonus,
+                        departmentName: this.DepartmentName
+                    })
+                        .then(res => {
+                            console.log(res.data);
+                            if (res.data == 'ok') {
+                                alert('岗位修改成功');
+                            } else {
+                                alert('岗位修改失败');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('岗位修改失败');
+                        })
+                },
+                addDuty: function () {
+                    console.log(this.Duty + " " + this.BaseWage + " " + this.OvertimeJob + " " + this.EvectionStandard + " " + this.AbsentStandard + " " + this.LateStandard + " " +
+                        this.LateStandard + " " + this.EtcStandard + " " + this.Bonus + " " + this.DepartmentName);
+
+                    // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+                    axios.post('/duty', {
+                        duty: this.Duty,
+                        baseWage: this.BaseWage,
+                        overtimeJob: this.OvertimeJob,
+                        evectionStandard: this.EvectionStandard,
+                        absentStandard: this.AbsentStandard,
+                        lateStandard: this.LateStandard,
+                        etcStandard: this.EtcStandard,
+                        bonus: this.Bonus,
+                        departmentName: this.DepartmentName
+                    })
+                        .then(res => {
+                            console.log(res.data);
+                            if (res.data == 'ok') {
+                                alert('添加岗位成功');
+                            } else {
+                                alert('该岗位已经存在');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('该岗位已经存在');
+                        })
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+                axios.get('/department')
+                    .then(res => {
+                        console.log(res)
+                        this.departments = res.data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    }),
+                    axios.get('/dutyList', {
+                        params: {
+                            departmentName: this.defaultDuty
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data.duty)
+                            this.dutyList = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+            },
+        })
+    </script>
+</body>
+
+</html>

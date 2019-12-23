@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>添加用户</title>
+    <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+    <script src="./layui/layui.js"></script>
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios HTTP Client Ajax操作 -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body class="layui-layout-body">
+
+    <div id="app">
+
+                <!-- 内容主体区域 -->
+                <div class="container-fluid">
+                    <div class="row py-4 my-4">
+
+                        <!-- 注册员工表单 -->
+                        <div class="col-lg-4 ">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">添加/删除员工</h4>
+                                    <div class="form-group">
+                                        <label for="">工号</label>
+                                        <input type="text" class="form-control" name="" id="" aria-describedby="helpId"
+                                            placeholder="请输入工号" v-model="id">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="">姓名</label>
+                                        <input type="text" class="form-control" name="" id="" aria-describedby="helpId"
+                                            placeholder="请输入姓名" v-model="name">
+                                    </div>
+
+                                    <!-- Department -->
+                                    <div class="form-group">
+                                        <label for="">部门</label>
+                                        <select class="form-control" name="DepartmentName" id="" @change="getDutyList()"
+                                            v-model="departmentname">
+                                            <option @click="getDutyList()" v-for="department in departments"
+                                                :value="department">{{department}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Duty Duty与部门一一对应-->
+                                    <div class="form-group">
+                                        <label for="">岗位</label>
+                                        <select class="form-control" name="Duty" id="" v-model="duty">
+                                            <option v-for="d in dutyList">{{d.duty}}</option>
+                                        </select>
+                                    </div>
+
+
+
+                                    <label for="">员工类型</label>
+                                    <div class="form-check form-check-inline mx-5">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input" name="permission" id=""
+                                                value="普通员工" v-model="type">
+                                            普通员工
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input" name="permission" id=""
+                                                value="管理员" v-model="type">
+                                            管理员
+                                        </label>
+                                    </div>
+                                    <button @click="createUser()" type="button" name="" id=""
+                                        class="btn btn-success btn-lg btn-block">添加用户</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 当前员工列表 -->
+                        <div class="col-lg-8">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>员工号</th>
+                                        <th>员工姓名</th>
+                                        <th>权限</th>
+                                        <th>部门</th>
+                                        <th>岗位</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="user in users">
+                                        <td>{{user.uid}}</td>
+                                        <td>{{user.username}}</td>
+                                        <td v-if="user.permission==admin">管理员</td>
+                                        <td v-else>普通用户</td>
+                                        <td>{{user.departmentName}}</td>
+                                        <td>{{user.duty}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <script>
+       
+        new Vue({
+            el: '#app',
+            data: {
+                id: '',
+                name: '',
+                type: '普通员工',
+                users: [],
+                departments: [],
+                dutyList: [],
+                defaultDuty: '研发部',
+                departmentname: '研发部',
+                duty: ''
+            },
+            methods: {
+                getDutyList: function () {
+                    console.log(this.departmentname);
+                    this.defaultDuty = this.departmentname;
+                    axios.get('/dutyList', {
+                        params: {
+                            departmentName: this.defaultDuty
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data.duty)
+                            this.dutyList = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                },
+                createUser: function () {
+                    console.log(this.id + " " + this.name + " " + this.type);
+                    axios.post('/user', {
+                        employeeID: this.id,
+                        userPassword: this.type,
+                        username: this.name,
+                        departmentName: this.departmentname,
+                        duty: this.duty
+                    })
+                        .then(res => {
+                            console.log(res);
+                            if (res.data == 'ok') {
+                                alert('添加成功');
+                                this.init();
+                            } else {
+                                alert('添加员工失败，请核对信息');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('添加员工失败，请核对信息');
+                        })
+                },
+                delUser: function () {
+                    axios.post('/deluser', {
+                        employeeID: this.id,
+                        username: this.name
+                    })
+                        .then(res => {
+                            console.log(res);
+                            if (res.data == 'ok') {
+                                alert('删除成功');
+                                this.init();
+                            }
+                            else
+                                alert('删除失败，信息不匹配');
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('删除失败，信息不匹配')
+                        })
+                },
+                init: function () {
+                    axios.get('/getUsers')
+                        .then(res => {
+                            console.log(res);
+                            this.users = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+                axios.get('/getUsers')
+                    .then(res => {
+                        //console.log(res);
+                        this.users = res.data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+
+                axios.get('/department')
+                    .then(res => {
+                        console.log(res)
+                        this.departments = res.data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+
+                axios.get('/dutyList', {
+                    params: {
+                        departmentName: this.defaultDuty
+                    }
+                })
+                    .then(res => {
+                        console.log(res.data.duty)
+                        this.dutyList = res.data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+            },
+        })
+
+
+    </script>
+</body>
+
+</html>

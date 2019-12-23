@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>考勤</title>
+    <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <style>
+        .jum {
+            background-color: #43CD80
+        }
+    </style>
+</head>
+
+<body class="layui-layout-body">
+    <div id="app">
+        <div class="layui-layout layui-layout-admin">
+                <div class="layui-header">
+                        <div class="layui-logo">员工工资管理系统</div>
+                        <!-- 头部区域（可配合layui已有的水平导航） -->
+                        <ul class="layui-nav layui-layout-left">
+                        	 <li class="layui-nav-item"><a href="/mlogin">首页</a></li>
+                            <li class="layui-nav-item"><a href="/finddutys">员工信息查询</a></li>
+                            <li class="layui-nav-item"><a href="/salaryInfo">员工薪资查询</a></li>
+                            <li class="layui-nav-item"><a href="/addcheckstat">添加员工考勤</a></li>
+                        </ul>
+                        <ul class="layui-nav layui-layout-right">
+                            <li class="layui-nav-item">
+                                <a href="javascript:;">
+                                    <img th:src="@{${session.IMG}}" class="layui-nav-img" th:text="${session.UID}">
+        
+                                </a>
+                            </li>
+                            <li class="layui-nav-item"><a href="/back">退出</a></li>
+                        </ul>
+                    </div>
+
+            <div class="layui-side layui-bg-black">
+                <div class="layui-side-scroll">
+                    <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                    <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a class="" href="javascript:;">员工管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="/adduser">添加员工</a></dd>
+                                <dd><a href="/delUser">删除员工</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">岗位管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="/addemployeeinfo">添加岗位</a></dd>
+                                <dd><a href="/changeduty">修改岗位</a></dd>
+                            </dl>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="layui-body">
+                <!-- 内容主体区域 -->
+                <div class="jumbotron jumbotron-fluid py-3 jum">
+                    <div class="container">
+                        <h1 class="display-3">考勤系统</h1>
+                        
+                    </div>
+                </div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-12 offset-lg-3 offset-md-3">
+                            <!-- 员工号 -->
+                            <div class="form-group">
+                                <label for="">员工号</label>
+                                <input type="text" class="form-control" placeholder="请输入员工号" 
+                                v-model="EmployeeID" maxlength="8" minlength="6"
+                                onkeyup="value=value.replace(/[\W]/g,'') " 
+                                	onchange="if(value.length<6) alert('长度不能小于6')"
+                                    required>
+                            </div>
+
+                            <!-- 加班 -->
+                            <div class="form-group">
+                                <label for="">加班津贴</label>
+                                <input type="text" class="form-control" placeholder="请输入加班津贴（元）" 
+                                v-model="OvertimeDay"
+                                onkeyup="if(/\D/.test(this.value)){alert('只能输入数字');this.value='';}"
+                                    >
+                            </div>
+
+
+                            <!-- 缺勤/迟到天数 -->
+                            <div class="form-group">
+                                <label for="">缺勤天数</label>
+                                <select class="form-control" v-model="AbsentDay">
+                                    <option v-for="i in 31">{{i}}</option>
+                                </select>
+                                
+                            </div>
+
+                            
+
+                            <!-- 月份 -->
+                            <div class="form-group">
+                                <label for="">月份</label>
+                                <select class="form-control" v-model="CheckDate">
+                                    <option v-for="index in 12">{{index}}</option>
+                                </select>
+                            </div>
+
+                            <!-- 按钮 -->
+                            <div class="form-group">
+                                <button type="submit" @click="addcheckstat()"
+                                    class="btn btn-success btn-lg btn-block">添加</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-footer">
+                <!-- 底部固定区域 -->
+               
+            </div>
+        </div>
+    </div>
+
+    <script src="./layui/layui.js"></script>
+    <script>
+        //JavaScript代码区域
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+
+        new Vue({
+            el: '#app',
+            data: {
+                EmployeeID: '',
+                OvertimeDay: '',
+                EventionDay: '',
+                AbsentDay: '',
+                LateDay: '',
+                CheckDate: ''
+            },
+            methods: {
+                addcheckstat: function () {
+                    axios.post('/checkstat', {
+                        eid: this.EmployeeID,
+                        allowance: this.OvertimeDay,
+                        noattendance: this.AbsentDay,
+                        month: this.CheckDate
+                    })
+                        .then(res => {
+                            console.log(res.data);
+                            if (res.data == 'ok') {
+                                alert('成功');
+                            }
+
+                            if (res.data == 'fail') {
+                                alert('请勿重复打卡');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('考勤失败，请核对员工号');
+                        })
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+
+            },
+        })
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Title</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <!-- vue.js -->
+   <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- jquery -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<style type="text/css">
+.img{
+	width:40px;
+	height:40px;
+}
+</style>
+</head>
+
+<body>
+
+  <div id="app" >
+    <!-- Nav tabs 导航栏-->
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="/e">首页</a>
+    <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId" aria-controls="collapsibleNavId"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavId">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+                <a class="nav-link" href="/salary">查看薪资<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/info">个人资料</a>
+            </li>
+            <!-- Button trigger modal 修改密码对话框 -->
+      <li class="nav-item">
+        <a href="/changpasswd" class="nav-link"  data-toggle="modal" data-target="#modelId" >修改密码</a>
+      </li>
+
+      <!-- Modal -->
+      <div class="modal fade" id="modelId" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">修改用户密码</h5>
+            </div>
+            <div class="modal-body">
+
+              <!-- 旧密码 -->
+              <div class="form-group">
+                <label for="">旧密码</label>
+                <input type="password" class="form-control" v-model="oldpwd">
+              </div>
+
+              <!-- 新密码 -->
+              <div class="form-group">
+                <label for="">新密码</label>
+                <input type="password" class="form-control" v-model="pwd1">
+              </div>
+
+              <!-- 再次输入 -->
+              <div class="form-group">
+                <label for="">再次输入</label>
+                <input type="password" class="form-control" v-model="pwd2">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+              <button type="button" class="btn btn-primary" @click="change()">更改</button>
+            </div>
+          </div>
+        </div>
+      </div>
+        
+     
+        </ul>
+        <form class="form-inline my-2 my-lg-0" action="/back">
+             <img th:src="@{${session.IMG}}" class="img" th:text="${session.NAME}">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">退出</button>
+        </form>
+    </div>
+</nav>
+
+  <div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-3"><span th:text="${session.NAME}"></span>，欢迎登陆</h1>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+
+</script>
+  <script>
+
+  
+    var vue = new Vue({
+      el:'#app',
+      data:{
+          oldpwd:'',
+          pwd1:'',
+          pwd2:'',
+         show:'',
+         ss :'',
+      },
+      methods: {
+    	 
+        change:function(){
+          console.log('abc');
+    
+          axios.post('/changpwd',{
+            oldpwd:this.oldpwd,
+            pwd1:this.pwd1,
+            pwd2:this.pwd2
+          })
+          .then(res => {
+            console.log(res.data)
+            if(res.data=='erropwd'){
+              alert('原密码输入错误');
+            }
+
+            if(res.data=='noequal'){
+              alert('新密码两次不一致');
+            }
+
+            if(res.data=='ok'){
+              $('#modelId').modal('hide')
+            }
+          })
+          .catch(err => {
+            console.error(err); 
+          })
+         },
+         
+      },
+      computed: {
+    	 
+      },
+      mounted() {
+    	 
+    	  console.log(this.ss);
+      		
+      },
+      
+    })
+  </script>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

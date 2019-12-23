@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Title</title>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	crossorigin="anonymous">
+
+<!-- vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<!-- axios -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<style>
+.jum {
+	background-color: #43CD80;
+}
+</style>
+</head>
+
+<body>
+
+	<div id="app">
+	<!-- Nav tabs 导航栏-->
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="/e">首页</a>
+    <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId" aria-controls="collapsibleNavId"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavId">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+                <a class="nav-link" href="/salary">查看薪资<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/info">个人资料</a>
+            </li>
+            <!-- Button trigger modal 修改密码对话框 -->
+      <li class="nav-item">
+        <a href="/changpasswd" class="nav-link"  data-toggle="modal" data-target="#modelId" >修改密码</a>
+      </li>
+
+      <!-- Modal -->
+      <div class="modal fade" id="modelId" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">修改用户密码</h5>
+            </div>
+            <div class="modal-body">
+
+              <!-- 旧密码 -->
+              <div class="form-group">
+                <label for="">旧密码</label>
+                <input type="password" class="form-control" v-model="oldpwd">
+              </div>
+
+              <!-- 新密码 -->
+              <div class="form-group">
+                <label for="">新密码</label>
+                <input type="password" class="form-control" v-model="pwd1">
+              </div>
+
+              <!-- 再次输入 -->
+              <div class="form-group">
+                <label for="">再次输入</label>
+                <input type="password" class="form-control" v-model="pwd2">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+              <button type="button" class="btn btn-primary" @click="change()">更改</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+        </ul>
+        <form class="form-inline my-2 my-lg-0" action="/">
+            
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">退出</button>
+        </form>
+    </div>
+</nav>
+		<!-- 展板  -->
+		<div class="jumbotron jumbotron-fluid jum">
+			<div class="container">
+				<h1 class="display-3">个人薪资查询</h1>
+			</div>
+		</div>
+
+		<!-- 个人信息与薪资查询 -->
+		<div class="container-fluid">
+			<div class="row">
+				<!-- 个人信息 -->
+				<div class="col-lg-4 col-md-4 col-sm-12">
+
+					<!-- 员工号 -->
+					<div class="form-group">
+						<label for="">员工号</label> <input type="text" class="form-control"
+							th:value="${session.UID}" readonly>
+					</div>
+
+					<!-- 姓名 -->
+					<div class="form-group">
+						<label for="">姓名</label> <input type="text" class="form-control"
+							th:value="${session.NAME}" readonly>
+					</div>
+
+					<!-- 部门 -->
+					<div class="form-group">
+						<label for="">部门</label> <input type="text" class="form-control"
+							th:value="${session.DNO}" readonly>
+					</div>
+
+					<!-- 岗位 -->
+					<div class="form-group">
+						<label for="">岗位</label> <input type="text" class="form-control"
+							th:value="${session.DUTY}" readonly>
+					</div>
+
+					<!-- 基本工资 -->
+					<div class="form-group">
+						<label for="">基本工资</label> <input type="text" class="form-control"
+							th:value="${session.BASEWAGE}" readonly>
+					</div>
+				</div>
+
+				<!-- 薪资表单 -->
+				<div class="col-lg-8 col-md-8 col-sm-12">
+					<div class="form-group">
+						<label for="">月份</label> <select class="form-control"
+							v-model="month"
+							@change="findSalary(this.value)">
+							<option v-for="index in 12">{{index}}</option>
+							<option value="全部">全部</option>
+						</select>
+					</div>
+
+					<table class="table">
+						<thead>
+							<tr>
+								<th>月份</th>
+								<th>加班津贴</th>
+
+								<th>缺勤/迟到天数</th>
+
+								<th>实发薪资</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="s in salary">
+								<td>{{s.month}}</td>
+								<td>{{s.allowance}}</td>
+								<td>{{s.noattendance}}</td>
+								<td>{{s.paid}}</td>
+								
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script>
+        new Vue({
+            el: '#app',
+            data: {
+                month: '',
+                salary:[]
+            },
+            methods: {
+                findSalary: function (text) {
+                	console.log(text);
+                	
+                    axios.get('/salarylist', {
+                        params: {
+                            month: this.month
+                        }
+                        })
+                    .then(res => {
+                        console.log(res.data);
+                        this.salary = res.data.list;
+                    })
+
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+
+            },
+        })        
+    </script>
+	<!-- Optional JavaScript -->
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+</body>
+
+</html>

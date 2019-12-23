@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>添加员工</title>
+ 
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios HTTP Client Ajax操作 -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body class="layui-layout-body">
+
+    <div id="app">
+
+                <!-- 内容主体区域 -->
+                <div class="container-fluid">
+                    <div class="row py-4 my-4">
+
+                        <!-- 注册员工表单 -->
+                        <div class="col-lg-4 ">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">添加员工</h4>
+                                    <div class="form-group">
+                                        <label for="">工号</label>
+                                        <input type="text" class="form-control" name="eid" id="" aria-describedby="helpId"
+                                            placeholder="请输入工号" v-model="id" maxlength="8" minlength="6" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="">姓名</label>
+                                        <input type="text" class="form-control" maxlength="10" minlength="2" aria-describedby="helpId"
+                                            placeholder="请输入姓名" v-model="name" 
+                                            onkeyup="value=value.replace(/[\d]/g,'') "
+                                            onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[\d]/g,''))"   
+  
+                                            required >
+                                    </div>
+
+                                    <!-- Department -->
+                                    <div class="form-group">
+                                        <label for="">岗位</label>
+                                        <select class="form-control" name="position" 
+                                            v-model="position">
+                                            <option  v-for="w in wiges"
+                                                :value="w">{{w}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Duty Duty与部门一一对应
+                                    <div class="form-group">
+                                        <label for="">岗位</label>
+                                        <select class="form-control" name="" id="" v-model="position">
+                                            <option v-for="d in dutyList">{{d.position}}</option>
+                                        </select>
+                                    </div>
+                                    -->
+                                     <!-- 入职时间-->
+                                    <div class="form-group">
+                                         <label for="">入职时间</label>
+                  <input type="date" class="form-control" name="entryDate" v-model="dates" required>
+                                    </div>
+
+                                    <button @click="createUser()" type="button" name="" id="" 
+                                        class="btn btn-success btn-lg btn-block">添加员工</button>
+                               
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 当前员工列表 -->
+                        <div class="col-lg-8">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>员工号</th>
+                                        <th>员工姓名</th>
+                                        
+                                        
+                                        <th>岗位</th>
+                                        <th>入职日期</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="e in employees">
+                                        <td>{{e.eid}}</td>
+                                        <td>{{e.ename}}</td>
+                                        
+                                        <td>{{e.wid}}</td>
+                                        <td>{{e.entryDate}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <script>
+       
+        new Vue({
+            el: '#app',
+            data: {
+                id: '',
+                name: '',
+                dates:'',
+                
+                employees: [],
+                wiges: [],
+                dutyList: [],
+                defaultDuty: 'RJ1',
+                
+                position: 'RJ1',
+                
+            },
+            methods: {
+               
+                createUser: function () {
+                    
+                    axios.post('/addemploy', {
+                        eid: this.id,
+                        ename: this.name,
+                        wid: this.position,
+                        entryDate: this.dates,
+                       
+                       
+                    })
+                        .then(res => {
+                            console.log(res.data);
+                            if (res.data =='ok') {
+                                alert('添加成功');
+                                axios.get('/getE')
+                                .then(res => {
+                                    //console.log(res);
+                                    this.employees = res.data;
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                })
+                            } else {
+                                alert('添加员工失败，请核对信息1');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            this.init();
+                            //alert('添加员工失败，请核对信息2');
+                        })
+                        
+                },
+                delUser: function () {
+                    axios.post('/deluser', {
+                        employeeID: this.id,
+                        username: this.name
+                    })
+                        .then(res => {
+                            console.log(res);
+                            if (res.data == 'ok') {
+                                alert('删除成功');
+                                this.init();
+                            }
+                            else
+                                alert('删除失败，信息不匹配1');
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('删除失败，信息不匹配2')
+                        })
+                },
+                init: function () {
+                	axios.get('/getE')
+                    .then(res => {
+                        //console.log(res);
+                        this.employees = res.data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+                axios.get('/getE')
+                    .then(res => {
+                        //console.log(res);
+                        this.employees = res.data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+
+                axios.get('/dutys')
+                    .then(res => {
+                        console.log(res)
+                        this.wiges = res.data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+
+              
+            },
+        })
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+    <title>后台管理</title>
+   <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body >
+<!-- Nav tabs导航 -->
+<ul class="nav nav-tabs " id="navId">
+    <li class="nav-item">
+        <a href="/mlogin" class="nav-link active">首页</a>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">员工信息</a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="/finddutys">查看员工信息</a>
+            <a class="dropdown-item" href="#tab3Id">添加员工信息</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#tab4Id">删除员工</a>
+        </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">用户信息</a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#tab2Id">查看用户</a>
+            <a class="dropdown-item" href="#tab3Id">修改用户</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#tab4Id">Action</a>
+        </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">工资信息</a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#tab2Id">按月份查询</a>
+            <a class="dropdown-item" href="#tab3Id">按部门查询</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#tab4Id">按个人查询</a>
+        </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">岗位信息</a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#tab2Id">查看</a>
+            <a class="dropdown-item" href="#tab3Id">添加</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#tab4Id">修改</a>
+        </div>
+    </li>
+    <li class="nav-item">
+        <a href="#tab5Id" class="nav-link">考勤</a>
+    </li>
+    <li class="nav-item">
+        <a href="#" class="nav-link disabled">报表</a>
+    </li>
+    <li class="nav-item">
+         <span  class="nav-link disabled" th:text="${session.NAME}"></span>
+    </li>
+    
+     <form class="form-inline my-2 my-lg-0" action="/">
+            
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">退出</button>
+        </form>
+</ul>
+
+
+                <!-- 内容主体区域 -->
+                <div id="app">
+                    <!-- 工资管理界面 -->
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- 左侧部门选择和员工选择 -->
+                            <div class="col-lg-4 col-sm-12 my-4 py-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title">请选择您要查询的部门</h4>
+                                        <div class="form-group">
+                                            <select class="form-control" name="" id="" v-model="departmentname">
+                                                <option v-for="department in departments">{{department}}</option>
+                                            </select>
+                                        </div>
+
+                                        <button @click="GetEmployeeList()" type="button" name="" id=""
+                                            class="btn btn-success btn-lg btn-block">查询</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 员工薪资信息 -->
+                            <div class="col-lg-8 col-sm-12 my-4 py-4">
+                                <table class="table text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>工号</th>
+                                            <th>姓名</th>
+                                            <th>职位</th>
+                                            <th>部门</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="employee in employees">
+                                            <td>{{employee.eid}}</td>
+                                            <td>{{employee.ename}}</td>
+                                            <td>{{employee.wid}}</td>
+                                            <td>{{departmentname}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+        </div>
+    </div>
+ 
+<script>
+        new Vue({
+            el: '#app',
+            data: {
+                departments: [],
+                employees: {},
+                departmentname: '软件'
+            },
+            methods: {
+                GetEmployeeList: function () {
+                    console.log(this.departmentname);
+                    let path = '/findEmployee/' + this.departmentname;
+                    axios.get(path)
+                        .then(res => {
+                            console.log(res)
+                            this.employees = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                },
+                getinfo: function (employeeID) {
+                    alert(employeeID);
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+                axios.get('/department')
+                    .then(res => {
+                        console.log(res)
+                        this.departments = res.data;
+                        this.GetEmployeeList();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+            },
+        })
+    </script>
+    
+       <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="./layui/layui.js"></script>
+    <script>
+</body>
+
+</html>

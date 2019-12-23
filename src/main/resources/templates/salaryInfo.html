@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- 顶栏菜单 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+            <a class="navbar-brand text-light" href="/m" >返回首页</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </nav>
+
+        <!-- 展板 -->
+        <div class="jumbotron jumbotron-fluid py-3">
+            <div class="container ">
+                <h1 class="display-4">管理员-<span  th:text="${session.NAME}"></span></h1>
+                <p class="lead"></p>
+            </div>
+        </div>
+
+        <!-- 工资管理界面 -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- 左侧部门选择和员工选择 -->
+                <div class="col-lg-4 col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">请选择您要查询的部门</h4>
+                            <div class="form-group">
+                                <select class="form-control" name="" id="" v-model="departmentname">
+                                    <option v-for="department in departments">{{department}}</option>
+                                </select>
+                            </div>
+
+                            <button @click="GetEmployeeList()" type="button" name="" id=""
+                                class="btn btn-success btn-lg btn-block">查询</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 员工薪资信息 -->
+                <div class="col-lg-8 col-sm-12">
+                    <table class="table text-center">
+                        <thead>
+                            <tr>
+                                <th>工号</th>
+                                <th>姓名</th>
+                                <th>职位</th>
+                                <th>部门</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="employee in employees">
+                                <td>{{employee.eid}}</td>
+                                <td>{{employee.ename}}</td>
+                                <td>{{employee.wid}}</td>
+                                <td>{{departmentname}}</td>
+                                <td>
+                                    <!-- Button trigger modal -->
+                                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal"
+                                        data-target="#modelId"
+                                        @click="getSalaryInfo(employee.eid,employee.ename)">
+                                        查看薪资信息
+                                    </button>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="modelId" tabindex="-1" role="dialog"
+                                        aria-labelledby="modelTitleId" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">{{employeename}}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- 薪资表单 -->
+                                                        <div class="form-group">
+                                                            <label for="">月份</label>
+                                                            <select class="form-control" v-model="month"
+                                                                @change="findSalary()">
+                                                                <option v-for="index in 12">{{index}}</option>
+                                                                <option>全部</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>月份</th>
+                                                                    <th>加班津贴</th>
+                                                                    
+                                                                    <th>缺勤迟到天数</th>
+                                                                    
+                                                                    <th>实发薪资</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr v-for="s in salary">
+                                                                    <td>{{s.month}}</td>
+                                                                    <td>{{s.allowance}}</td>
+                                                                    <td>{{s.noattendance}}</td>
+                                                                    <td>{{s.paid}}</td>
+                                                                    
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                departments: [],
+                employees: {},
+                departmentname: '软件',
+                employeename: '',
+                salary:[],
+                month: '',
+                employeeID:''
+            },
+            methods: {
+                GetEmployeeList: function () {
+                    console.log(this.departmentname);
+                    let path = '/findEmployee/' + this.departmentname;
+                    axios.get(path)
+                        .then(res => {
+                            console.log(res)
+                            this.employees = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                },
+
+                getSalaryInfo: function (id, name) {
+                    this.employeename = name;
+                    this.employeeID = id;
+                    console.log(this.employeeID);
+                },
+
+                findSalary: function () {
+                   axios.get(`/salarylist/${this.employeeID}/${this.month}`)
+                   .then(res => {
+                       console.log(res);
+                       this.salary = res.data;
+                   })
+                   .catch(err => {
+                       console.error(err); 
+                   })
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+                axios.get('/department')
+                    .then(res => {
+                        console.log(res)
+                        this.departments = res.data;
+                        this.GetEmployeeList();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+            },
+        })
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

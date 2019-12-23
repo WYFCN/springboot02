@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>layout 后台大布局 - Layui</title>
+    <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body class="layui-layout-body">
+    <div id="app">
+        <div class="layui-layout layui-layout-admin">
+            <div class="layui-header">
+                <div class="layui-logo">员工工资管理系统</div>
+                <!-- 头部区域（可配合layui已有的水平导航） -->
+                <ul class="layui-nav layui-layout-left">
+                    <li class="layui-nav-item"><a href="/finddutys">员工信息查询</a></li>
+                    <li class="layui-nav-item"><a href="/salaryInfo">员工薪资查询</a></li>
+                    <li class="layui-nav-item"><a href="/addcheckstat">添加员工考勤</a></li>
+                </ul>
+                <ul class="layui-nav layui-layout-right">
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">
+                            <img src="http://t.cn/RCzsdCq" class="layui-nav-img" th:text="${session.Username}">
+
+                        </a>
+                    </li>
+                    <li class="layui-nav-item"><a href="/back">注销</a></li>
+                </ul>
+            </div>
+
+            <div class="layui-side layui-bg-black">
+                <div class="layui-side-scroll">
+                    <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                    <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a class="" href="javascript:;">员工管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="/adduser">添加员工</a></dd>
+                                <dd><a href="/delUser">删除员工</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">岗位管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="/addemployeeinfo">添加岗位</a></dd>
+                                <dd><a href="/changeduty">修改岗位</a></dd>
+                            </dl>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="layui-body">
+                <!-- 内容主体区域 -->
+                <div id="app">
+                    <!-- 工资管理界面 -->
+                    <div class="container-fluid">
+                        <div class="jumbotron jumbotron-fluid">
+                            <div class="container">
+                                <h1 class="display-3">删除岗位需要谨慎</h1>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Department -->
+                            <div class="col-lg-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label for="">部门</label>
+                                    <select class="form-control" name="DepartmentName" id="" @change="getDutyList()"
+                                        v-model="departmentname">
+                                        <option @click="getDutyList()" v-for="department in departments"
+                                            :value="department">{{department}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12">
+                                <!-- Duty Duty与部门一一对应-->
+                                <div class="form-group">
+                                    <label for="">岗位</label>
+                                    <select class="form-control" name="Duty" id="" v-model="duty" @change="getinfo()">
+                                        <option v-for="d in dutyList">{{d.duty}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12">
+                                <button type="button" class="btn btn-danger btn-lg btn-block"
+                                    @click="delduty()">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-footer">
+                <!-- 底部固定区域 -->
+                © layui.com - 底部固定区域
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="./layui/layui.js"></script>
+    <script>
+        //JavaScript代码区域
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+
+        new Vue({
+            el: '#app',
+            data: {
+                employees: {},
+                id: '',
+                name: '',
+                type: '普通员工',
+                users: [],
+                departments: [],
+                dutyList: [],
+                defaultDuty: '研发部',
+                departmentname: '研发部',
+                duty: ''
+            },
+            methods: {
+                getDutyList: function () {
+                    console.log(this.departmentname);
+                    this.defaultDuty = this.departmentname;
+                    axios.get('/dutyList', {
+                        params: {
+                            departmentName: this.defaultDuty
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data.duty)
+                            this.dutyList = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                },
+                GetEmployeeList: function () {
+                    console.log(this.departmentname);
+                    let path = '/findEmployee/' + this.departmentname;
+                    axios.get(path)
+                        .then(res => {
+                            console.log(res)
+                            this.employees = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+                },
+                getinfo: function (employeeID) {
+                    alert(employeeID);
+                },
+                delduty: function () {
+                    axios.delete(`/duty/${this.duty}`)
+                        .then(res => {
+                            console.log(res);
+                            if (res.data == 'OK') {
+                                alert('删除成功');
+                            } else {
+                                alert('删除失败');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('删除失败');
+                        })
+                }
+            },
+            computed: {
+
+            },
+            mounted() {
+                axios.get('/department')
+                    .then(res => {
+                        console.log(res)
+                        this.departments = res.data;
+                        this.GetEmployeeList();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    }),
+                    axios.get('/dutyList', {
+                        params: {
+                            departmentName: this.defaultDuty
+                        }
+                    })
+                        .then(res => {
+                            console.log(res.data.duty)
+                            this.dutyList = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        })
+            },
+        })
+    </script>
+</body>
+
+</html>

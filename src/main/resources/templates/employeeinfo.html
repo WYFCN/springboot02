@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>个人资料</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <style>
+    .jum {
+      background-color: #43CD80;
+      color: black;
+    }
+    .img{
+    width:130px ;height:142px;
+    }
+  </style>
+
+  <!-- vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+
+  <div id="app">
+	<!-- Nav tabs 导航栏-->
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="/e">首页</a>
+    <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId" aria-controls="collapsibleNavId"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavId">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+                <a class="nav-link" href="/salary">查看薪资<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/info">个人资料</a>
+            </li>
+            <!-- Button trigger modal 修改密码对话框 -->
+      <li class="nav-item">
+        <a href="/changpasswd" class="nav-link"  data-toggle="modal" data-target="#modelId" >修改密码</a>
+      </li>
+
+      <!-- Modal -->
+      <div class="modal fade" id="modelId" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">修改用户密码</h5>
+            </div>
+            <div class="modal-body">
+
+              <!-- 旧密码 -->
+              <div class="form-group">
+                <label for="">旧密码</label>
+                <input type="password" class="form-control" v-model="oldpwd">
+              </div>
+
+              <!-- 新密码 -->
+              <div class="form-group">
+                <label for="">新密码</label>
+                <input type="password" class="form-control" v-model="pwd1">
+              </div>
+
+              <!-- 再次输入 -->
+              <div class="form-group">
+                <label for="">再次输入</label>
+                <input type="password" class="form-control" v-model="pwd2">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+              <button type="button" class="btn btn-primary" @click="change()">更改</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+        </ul>
+        <form class="form-inline my-2 my-lg-0" action="/">
+            
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">退出</button>
+        </form>
+    </div>
+</nav>
+		<!-- 展板  -->
+		<div class="jumbotron jumbotron-fluid jum">
+			<div class="container">
+				<h1 class="display-3">
+        	<img class="img offset-lg-1" alt="" 
+        	id="p1" 
+        	th:src="@{${session.IMG}}"/>个人资料
+        	
+			</div>
+		</div>
+
+    <!-- 个人信息表单 -->
+    <div class="card">
+      <div class="card-body">
+        <div class="form-group">
+        	
+          <!-- 提交表单 -->
+          <form action="/userset" method="POST">
+			
+            <div class="row">
+            
+              <!-- Picture -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1">
+                <div class="form-group" >
+                  <label for="">头像</label>
+                  
+                  <input type="text" class="form-control" name="picture" th:value="${session.IMG}" aria-describedby="helpId" required>
+                </div>
+              </div>
+            <!-- 用户账号不可更改 -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-.5">
+                <label for="">账号</label>
+                <input type="text" class="form-control" th:value="${session.UID}"  name="uid"  readonly>
+              </div>
+              <!-- 员工号不可更改 -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1">
+                <label for="">员工号</label>
+                <input type="text" class="form-control" th:value="${session.UID}" name="eid" readonly>
+              </div>
+
+              <!-- 员工姓名不可更改 -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-.5">
+                <label for="">姓名</label>
+                <input type="text" class="form-control" th:value="${session.NAME}" name="ename" readonly>
+              </div>
+
+	
+              <!-- Department不可改 -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1">
+                <label for="">部门</label>
+                <input type="text" class="form-control" th:value="${session.DNO}" name="dno"
+                  readonly>
+              </div>
+
+              <!-- Duty Duty与部门一一对应-->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-.5">
+                <label for="">岗位</label>
+                <input type="text" class="form-control" th:value="${session.DUTY}" name="position" readonly>
+              </div>
+              
+              <!-- EMAIL -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1">
+                <div class="form-group">
+                  <label for="">邮箱</label>
+                  <input type="text" class="form-control" name="email" 
+                  th:value="${session.EMAIL}"
+                  placeholder="请输入邮箱" 
+                  required pattern="^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$" title="请输入正确的邮箱格式">
+                </div>
+              </div>
+
+              <!-- Telephone -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-.5">
+                <div class="form-group">
+                  <label for="">电话</label>
+                  <input type="text" class="form-control" name="phone" 
+                  th:value="${session.PHONE}"
+                  aria-describedby="helpId" placeholder="请输入电话"
+                  pattern="^(13[0-9]\d{8}|15[0-35-9]\d{8}|18[0-9]\{8}|14[57]\d{8})$"
+                    required>
+                </div>
+              </div>
+
+            
+
+              <!-- 提交按钮 -->
+              <div class="col-lg-5 col-md-5 col-sm-12 offset-lg-1 my-3">
+                <button type="submit" class="btn btn-success btn-lg btn-block">提交</button>
+              </div>
+
+              <!-- 重置按钮 -->
+              <div class="col-lg-5 col-md-5 col-sm-12 my-3">
+                <button type="reset" class="btn btn-danger btn-lg btn-block">重置</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+        new Vue({
+            el: '#app',
+            data: {
+               url: '',
+               eid:''
+            },
+            methods: {
+                
+            },
+            computed: {
+
+            },
+            mounted() {
+            	
+            },
+        })        
+    </script>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

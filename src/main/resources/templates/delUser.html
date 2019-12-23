@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>layout 后台大布局 - Layui</title>
+    <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+    <script src="./layui/layui.js"></script>
+
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- axios HTTP Client Ajax操作 -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body class="layui-layout-body">
+
+    <div id="app">
+        <div class="layui-layout layui-layout-admin">
+                <div class="layui-header">
+                        <div class="layui-logo">员工工资管理系统</div>
+                        <!-- 头部区域（可配合layui已有的水平导航） -->
+                        <ul class="layui-nav layui-layout-left">
+                        <li class="layui-nav-item"><a href="/mlogin">首页</a></li>
+                            <li class="layui-nav-item"><a href="/finddutys">员工信息查询</a></li>
+                            <li class="layui-nav-item"><a href="/salaryInfo">员工薪资查询</a></li>
+                            <li class="layui-nav-item"><a href="/addcheckstat">添加员工考勤</a></li>
+                        </ul>
+                        <ul class="layui-nav layui-layout-right">
+                            <li class="layui-nav-item">
+                                <a href="javascript:;">
+                                    <img th:src="@{${session.IMG}}" class="layui-nav-img" th:text="${session.NAME}">
+        
+                                </a>
+                            </li>
+                            <li class="layui-nav-item"><a href="/back">退出</a></li>
+                        </ul>
+                    </div>
+
+            <div class="layui-side layui-bg-black">
+                <div class="layui-side-scroll">
+                    <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                    <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a class="" href="javascript:;">员工管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="/adduser">添加员工</a></dd>
+                                <dd><a href="/delUser">删除员工</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">岗位管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="/addemployeeinfo">添加岗位</a></dd>
+                                <dd><a href="/changeduty">修改岗位</a></dd>
+                            </dl>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="layui-body">
+                <!-- 内容主体区域 -->
+                <div class="container-fluid">
+                    <div class="row py-4 my-4">
+
+                        <!-- 注册员工表单 -->
+                        <div class="col-lg-4 ">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">添加/删除员工</h4>
+                                    <div class="form-group">
+                                        <label for="">工号</label>
+                                        <input type="text" class="form-control"  aria-describedby="helpId"
+                                            placeholder="请输入工号" v-model="id">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="">姓名</label>
+                                        <input type="text" class="form-control" name="" id="" aria-describedby="helpId"
+                                            placeholder="请输入姓名" v-model="name">
+                                    </div>
+
+                                    <button @click="delUser()" type="button" name="" id=""
+                                        class="btn btn-danger btn-lg btn-block">删除用户</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 当前员工列表 -->
+                        <div class="col-lg-8">
+                        	<h3>删除的员工</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>员工号</th>
+                                        <th>员工姓名</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr >
+                                        <td>{{employee.eid}}</td>
+                                        <td>{{employee.ename}}</td>
+                                       
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-footer">
+            <!-- 底部固定区域 -->
+            
+        </div>
+    </div>
+    </div>
+
+    <script>
+        //JavaScript代码区域
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+
+        //Demo
+        layui.use('form', function () {
+            var form = layui.form;
+            //监听提交
+            form.on('submit(formDemo)', function (data) {
+                layer.msg(JSON.stringify(data.field));
+                return false;
+            });
+        });
+
+        new Vue({
+            el: '#app',
+            data: {
+                id: '',
+                name: '',
+               	employee:{},
+            },
+            methods: {
+                
+             
+                delUser: function () {
+                    axios.post('/deluser', {
+                        eid: this.id,
+                        ename: this.name
+                    })
+                        .then(res => {
+                            console.log(res);
+                            if (res.data.msg == 'ok') {
+                                alert('删除成功');
+                                this.employee=res.data.e;
+                                console.log(e);
+                            }
+                            else
+                                alert('删除失败，信息不匹配1');
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            
+                        })
+                },
+                
+            },
+            computed: {
+
+            },
+            mounted() {
+               
+            },
+        })
+
+
+    </script>
+</body>
+
+</html>
